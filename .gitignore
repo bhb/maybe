@@ -1,5 +1,7 @@
+.gitignore
 *.sw?
 .DS_Store
 coverage
 rdoc
 pkg
+maybe.gemspec

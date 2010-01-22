@@ -5,11 +5,12 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "maybe"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{A library for treating nil and non-nil objects in a similar manner.}
+    gem.description = %Q{A library for treating nil and non-nil objects in a similar manner. Technically speaking, Maybe is an implemenation of the maybe monad. The Maybe class wraps any value (nil or non-nil) and lets you treat it as non-nil.}
     gem.email = "ben@devver.net"
-    gem.homepage = "http://github.com/devver/maybe"
+    gem.homepage = "http://github.com/bhb/maybe"
     gem.authors = ["Ben Brinckerhoff"]
+    gem.add_development_dependency("mocha", "~> 0.9.8")
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
