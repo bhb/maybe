@@ -1,11 +1,3 @@
-class Object
-    
-  def is_maybe?
-    false
-  end
-
-end
-
 def Maybe(value)
   Maybe.new(value)
 end
@@ -58,14 +50,10 @@ class Maybe
   end
 
   def join
-    if(@value.is_maybe?)
+    if(@value.is_a?(Maybe))
       @value = value.value
     end
     self
-  end
-
-  def is_maybe?
-    return true
   end
 
   # for testing purposes

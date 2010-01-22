@@ -3,10 +3,6 @@ require 'cgi'
 
 class MaybeTest < Test::Unit::TestCase
 
-  def test_maybe__creates_new_maybe
-    assert Maybe(1).is_maybe?
-  end
-
   def test_initialize__performs_join
     assert_equal 1, Maybe.new(Maybe.new(1)).value
   end
