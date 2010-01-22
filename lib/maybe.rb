@@ -4,7 +4,7 @@ end
 
 class Maybe
 
-  instance_methods.reject { |m| m =~ /^__/ }.each { |m| undef_method m }
+  instance_methods.reject { |method_name| method_name =~ /^__/ }.each { |method_name| undef_method method_name }
 
   def initialize(value)
     @value = value
@@ -12,8 +12,8 @@ class Maybe
   end
 
   def method_missing(method_name, *args)
-    self.fmap do |v|
-      v.send(method_name,*args) do |*block_args|
+    self.fmap do |value|
+      value.send(method_name,*args) do |*block_args|
         yield(*block_args) if block_given?
       end
     end
