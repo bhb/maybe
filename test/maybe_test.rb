@@ -7,10 +7,10 @@ class MaybeTest < Test::Unit::TestCase
     assert_equal 1, Maybe.new(Maybe.new(1)).value
   end
 
-   def test_initialize__never_calls_pass_on_nested_maybe
-     Maybe.any_instance.expects(:pass).never
-     Maybe.new(Maybe.new(1)).value
-   end
+  def test_initialize__never_calls_pass_on_nested_maybe
+    Maybe.any_instance.expects(:pass).never
+    Maybe.new(Maybe.new(1)).value
+  end
 
   def test_call_match_operator
     assert_equal nil, (Maybe.new(nil)=~/b/).value
@@ -36,6 +36,13 @@ class MaybeTest < Test::Unit::TestCase
     x = Maybe.new(1)
     x.to_s
     assert_equal 1, x.value
+  end
+
+  def test_object_id_for_wrapped_object_is_different
+    wrapped = "hello"
+    maybe = Maybe.new(wrapped)
+    assert_not_equal wrapped.object_id, maybe.object_id
+    assert_equal wrapped.object_id, maybe.value.object_id
   end
 
   def test_method_with_arg_and_block
@@ -117,6 +124,5 @@ class MaybeTest < Test::Unit::TestCase
     n = Maybe.new(3)
     assert_equal m.pass{|x| f[x]}.pass{|x|g[x]}.value, n.pass{|x| f[x].pass{|y|g[y]}}.value
   end
-
 
 end

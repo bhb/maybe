@@ -4,7 +4,7 @@ end
 
 class Maybe
 
-  instance_methods.reject { |method_name| method_name =~ /^__/ }.each { |method_name| undef_method method_name }
+  instance_methods.reject { |method_name| method_name =~ /^__/ || method_name =~ /object_id/ }.each { |method_name| undef_method method_name }
 
   def initialize(value)
     @value = value
