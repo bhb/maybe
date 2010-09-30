@@ -51,7 +51,7 @@ class Maybe
 
   def join
     if(@value.is_a?(Maybe))
-      @value = value.value
+      @value = @value.value
     end
     self
   end
