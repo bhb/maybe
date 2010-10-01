@@ -84,6 +84,45 @@ class MaybeTest < Test::Unit::TestCase
 
   end
 
+  context "respond_to?" do
+    
+    should "respond correctly" do
+      klass = Class.new do
+        def fmap
+        end
+
+        def foo
+        end
+      end
+      
+      wrapped = klass.new
+      maybe = Maybe.new(wrapped)
+
+      assert_equal false, wrapped.respond_to?(:bar)
+      assert_equal true, wrapped.respond_to?(:foo)
+      assert_equal true, wrapped.respond_to?(:fmap)
+      assert_equal false, wrapped.respond_to?(:join)
+      assert_equal false, wrapped.respond_to?(:value)
+      assert_equal false, wrapped.respond_to?(:pass)
+      assert_equal false, wrapped.respond_to?(:__fmap__)
+      assert_equal false, wrapped.respond_to?(:__join__)
+      assert_equal false, wrapped.respond_to?(:__value__)
+      assert_equal false, wrapped.respond_to?(:__pass__)
+
+      assert_equal false, maybe.respond_to?(:bar)
+      assert_equal true, maybe.respond_to?(:foo)
+      assert_equal true, maybe.respond_to?(:fmap)
+      assert_equal true, maybe.respond_to?(:join)
+      assert_equal true, maybe.respond_to?(:value)
+      assert_equal true, maybe.respond_to?(:pass)
+      assert_equal true, maybe.respond_to?(:__fmap__)
+      assert_equal true, maybe.respond_to?(:__join__)
+      assert_equal true, maybe.respond_to?(:__value__)
+      assert_equal true, maybe.respond_to?(:__pass__)
+    end
+    
+  end
+
   context "#pass" do
 
     should "not conflict with wrapped object's #pass method" do

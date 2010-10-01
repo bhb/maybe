@@ -4,11 +4,18 @@ end
 
 class Maybe
 
-  instance_methods.reject { |method_name| method_name =~ /^__/ || method_name == 'object_id' }.each { |method_name| undef_method method_name }
+  LEGACY_METHODS = %w{value pass fmap join}
+
+  instance_methods.reject { |method_name| method_name =~ /^__/ || ['object_id','respond_to?', 'methods'].include?(method_name) }.each { |method_name| undef_method method_name }
 
   def initialize(value)
     @value = value
     __join__
+  end
+  
+  def respond_to?(method_name)
+    return true if LEGACY_METHODS.include?(method_name.to_s)
+    super || @value.respond_to?(method_name)
   end
 
   def method_missing(method_name, *args, &block)
