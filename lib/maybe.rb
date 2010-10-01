@@ -39,7 +39,7 @@ class Maybe
   end
 
   def __value__(value_if_nil=nil)
-    if(value_if_nil!=nil && @value==nil)
+    if(@value==nil)
       value_if_nil
     else
       @value
