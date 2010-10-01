@@ -18,12 +18,20 @@ class Maybe
       end
     end
   end
-  
-  def value(value_if_nil=nil)
+
+  def __value__(value_if_nil=nil)
     if(value_if_nil!=nil && @value==nil)
       value_if_nil
     else
       @value
+    end
+  end
+  
+  def value(*args, &block)
+    if @value.respond_to?(:value)
+      @value.send(:value, *args, &block)
+    else
+      __value__(args.first)
     end
   end
   
@@ -51,7 +59,7 @@ class Maybe
 
   def join
     if(@value.is_a?(Maybe))
-      @value = @value.value
+      @value = @value.__value__
     end
     self
   end

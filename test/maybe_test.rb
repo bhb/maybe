@@ -7,12 +7,12 @@ class MaybeTest < Test::Unit::TestCase
   context "#initialize" do
 
     should "perform join" do
-      assert_equal 1, Maybe.new(Maybe.new(1)).value
+      assert_equal 1, Maybe.new(Maybe.new(1)).__value__
     end
 
     should "never call pass on nested maybe" do
       Maybe.any_instance.expects(:pass).never
-      Maybe.new(Maybe.new(1)).value
+      Maybe.new(Maybe.new(1)).__value__
     end
     
   end
@@ -20,37 +20,37 @@ class MaybeTest < Test::Unit::TestCase
   context "when calling methods" do
 
     should "return correct value for match operator" do
-      assert_equal nil, (Maybe.new(nil)=~/b/).value
-      assert_equal 1, (Maybe.new('abc')=~/b/).value    
+      assert_equal nil, (Maybe.new(nil)=~/b/).__value__
+      assert_equal 1, (Maybe.new('abc')=~/b/).__value__    
     end
 
     should "return correct value for to_s" do
-      assert_equal nil, (Maybe.new(nil).to_s).value
-      assert_equal "1", (Maybe.new(1).to_s).value
+      assert_equal nil, (Maybe.new(nil).to_s).__value__
+      assert_equal "1", (Maybe.new(1).to_s).__value__
     end
 
     should "return correct value for to_int" do
-      assert_equal nil, Maybe.new(nil).to_int.value
-      assert_equal 2, Maybe.new(2.3).to_int.value
+      assert_equal nil, Maybe.new(nil).to_int.__value__
+      assert_equal 2, Maybe.new(2.3).to_int.__value__
     end
     
     should "work if method call takes a block" do
-      assert_equal nil, Maybe.new(nil).map{|x|x*2}.value
-      assert_equal [2,4,6], Maybe.new([1,2,3]).map{|x|x*2}.value
+      assert_equal nil, Maybe.new(nil).map{|x|x*2}.__value__
+      assert_equal [2,4,6], Maybe.new([1,2,3]).map{|x|x*2}.__value__
     end
 
     should "work if methods takes args and a block" do
-      assert_equal nil, Maybe.new(nil).gsub(/x/) {|m| m.upcase}.value
+      assert_equal nil, Maybe.new(nil).gsub(/x/) {|m| m.upcase}.__value__
       str = Maybe.new('x').gsub(/x/) do |m| 
         m.upcase
       end
-      assert_equal 'X', str.value
+      assert_equal 'X', str.__value__
     end
 
     should "not change the value" do
       x = Maybe.new(1)
       x.to_s
-      assert_equal 1, x.value
+      assert_equal 1, x.__value__
     end
 
   end
@@ -61,7 +61,7 @@ class MaybeTest < Test::Unit::TestCase
       wrapped = "hello"
       maybe = Maybe.new(wrapped)
       assert_not_equal wrapped.object_id, maybe.object_id
-      assert_equal wrapped.object_id, maybe.value.object_id
+      assert_equal wrapped.object_id, maybe.__value__.object_id
     end
 
   end
@@ -71,7 +71,7 @@ class MaybeTest < Test::Unit::TestCase
     should "not call #pass" do
       Maybe.any_instance.expects(:pass).never
       m = Maybe.new(nil)
-      m.value = Maybe.new(1)
+      m.__value__ = Maybe.new(1)
       m.join
     end
 
@@ -82,8 +82,8 @@ class MaybeTest < Test::Unit::TestCase
     should "work with CGI.unescape" do
       # using CGI::unescape because that's the first function I had problems with 
       # when implementing Maybe
-      assert_equal nil, Maybe.new(nil).pass {|v|CGI.unescapeHTML(v)}.value
-      assert_equal '&', Maybe.new('&amp;').pass {|v|CGI.unescapeHTML(v)}.value
+      assert_equal nil, Maybe.new(nil).pass {|v|CGI.unescapeHTML(v)}.__value__
+      assert_equal '&', Maybe.new('&amp;').pass {|v|CGI.unescapeHTML(v)}.__value__
     end
     
   end
@@ -102,23 +102,48 @@ class MaybeTest < Test::Unit::TestCase
 
   context "#value" do
 
-    should "return value with no params" do
+    should "return value if wrapped object does not define #value" do
       assert_equal nil, Maybe.new(nil).value
       assert_equal 1, Maybe.new(1).value
+    end
+
+    should "call wrapped object's #value if defined" do
+      wrapped = Object.new
+      def wrapped.value
+        "foo"
+      end
+      assert_equal "foo", Maybe.new(wrapped).value
+    end
+
+    should "call wrapped object's #value if defined (with params and block)" do
+      wrapped = Object.new
+      def wrapped.value(value)
+        value * yield 
+      end
+      assert_equal 4, Maybe.new(wrapped).value(2) { 2 }
+    end
+
+  end
+
+  context "#__value__" do
+
+    should "return value with no params" do
+      assert_equal nil, Maybe.new(nil).__value__
+      assert_equal 1, Maybe.new(1).__value__
     end
 
     context "when default is provided" do
 
       should "return default is value is nil" do
-        assert_equal "", Maybe.new(nil).value("")
-        assert_equal nil, Maybe.new(nil).value(nil)
-        assert_equal false, Maybe.new(nil).value(false)
+        assert_equal "", Maybe.new(nil).__value__("")
+        assert_equal nil, Maybe.new(nil).__value__(nil)
+        assert_equal false, Maybe.new(nil).__value__(false)
       end
 
       should "return value if value is non-nil" do
-        assert_equal 1, Maybe.new(1).value("1")
-        assert_equal true, Maybe.new(true).value(nil)
-        assert_equal 1, Maybe.new(1).value(false)
+        assert_equal 1, Maybe.new(1).__value__("1")
+        assert_equal true, Maybe.new(true).__value__(nil)
+        assert_equal 1, Maybe.new(1).__value__(false)
       end
 
     end
@@ -146,7 +171,7 @@ class MaybeTest < Test::Unit::TestCase
     should "satisfy monad rule #1" do
       f = lambda {|y| Maybe.new(y.to_s)}
       x = 1
-      assert_equal f[x], Maybe.new(x).pass {|y| f[y]}.value
+      assert_equal f[x], Maybe.new(x).pass {|y| f[y]}.__value__
     end
   
     #2. pass with a block that simply calls wrap on its value should produce the exact same values, wrapped up again.
@@ -154,7 +179,7 @@ class MaybeTest < Test::Unit::TestCase
     # scala version: m flatMap unit ≡ m
     should "satisfy monad rule #2" do
       x = Maybe.new(1)
-      assert_equal x.value, x.pass {|y| Maybe.new(y)}.value
+      assert_equal x.__value__, x.pass {|y| Maybe.new(y)}.__value__
     end
 
     #3. nesting pass blocks should be equivalent to calling them sequentially
@@ -163,7 +188,7 @@ class MaybeTest < Test::Unit::TestCase
       g = lambda {|x| Maybe.new(x+1)}
       m = Maybe.new(3)
       n = Maybe.new(3)
-      assert_equal m.pass{|x| f[x]}.pass{|x|g[x]}.value, n.pass{|x| f[x].pass{|y|g[y]}}.value
+      assert_equal m.pass{|x| f[x]}.pass{|x|g[x]}.__value__, n.pass{|x| f[x].pass{|y|g[y]}}.__value__
     end
 
   end
