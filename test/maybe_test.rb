@@ -11,7 +11,7 @@ class MaybeTest < Test::Unit::TestCase
     end
 
     should "never call pass on nested maybe" do
-      Maybe.any_instance.expects(:pass).never
+      Maybe.any_instance.expects(:__pass__).never
       Maybe.new(Maybe.new(1)).__value__
     end
     
@@ -69,10 +69,16 @@ class MaybeTest < Test::Unit::TestCase
   context "#join" do
     
     should "not call #pass" do
-      Maybe.any_instance.expects(:pass).never
+      Maybe.any_instance.expects(:__pass__).never
       m = Maybe.new(nil)
       m.instance_variable_set(:@value, Maybe.new(1))
       m.join
+      m.__join__
+    end
+
+    should "call the wrapped object's #join if defined" do
+      wrapped = %w{a b c}
+      assert_equal "a b c", Maybe.new(wrapped).join(' ')
     end
 
   end
@@ -90,8 +96,11 @@ class MaybeTest < Test::Unit::TestCase
     should "work with CGI.unescape" do
       # using CGI::unescape because that's the first function I had problems with 
       # when implementing Maybe
-      assert_equal nil, Maybe.new(nil).pass {|v|CGI.unescapeHTML(v)}.__value__
-      assert_equal '&', Maybe.new('&amp;').pass {|v|CGI.unescapeHTML(v)}.__value__
+      assert_equal nil, Maybe.new(nil).pass {|v|CGI.unescapeHTML(v)}.value
+      assert_equal '&', Maybe.new('&amp;').pass {|v|CGI.unescapeHTML(v)}.value
+
+      assert_equal nil, Maybe.new(nil).__pass__ {|v|CGI.unescapeHTML(v)}.__value__
+      assert_equal '&', Maybe.new('&amp;').__pass__ {|v|CGI.unescapeHTML(v)}.__value__
     end
     
   end
@@ -158,6 +167,18 @@ class MaybeTest < Test::Unit::TestCase
 
   end
 
+  context "#fmap" do
+
+    should "call wrapped object's #fmap if defined" do
+      wrapped = Object.new
+      def wrapped.fmap
+        "x"
+      end
+      assert_equal "x", Maybe.new(wrapped).fmap
+    end
+    
+  end
+
   context "when testing monad rules" do
 
     # the connection between fmap and pass (translated from)
@@ -168,6 +189,7 @@ class MaybeTest < Test::Unit::TestCase
       f = lambda {|x| x*2}
       m = Maybe.new(5)
       assert_equal m.fmap(&f), m.pass {|x| Maybe.new(f[x])}
+      assert_equal m.__fmap__(&f), m.__pass__ {|x| Maybe.new(f[x])}
     end
 
     # monad rules taken from http://moonbase.rydia.net/mental/writings/programming/monads-in-ruby/01identity
@@ -179,7 +201,8 @@ class MaybeTest < Test::Unit::TestCase
     should "satisfy monad rule #1" do
       f = lambda {|y| Maybe.new(y.to_s)}
       x = 1
-      assert_equal f[x], Maybe.new(x).pass {|y| f[y]}.__value__
+      assert_equal f[x], Maybe.new(x).pass {|y| f[y]}.value
+      assert_equal f[x], Maybe.new(x).__pass__ {|y| f[y]}.__value__
     end
   
     #2. pass with a block that simply calls wrap on its value should produce the exact same values, wrapped up again.
@@ -187,6 +210,7 @@ class MaybeTest < Test::Unit::TestCase
     # scala version: m flatMap unit ≡ m
     should "satisfy monad rule #2" do
       x = Maybe.new(1)
+      assert_equal x.value, x.pass {|y| Maybe.new(y)}.value
       assert_equal x.__value__, x.pass {|y| Maybe.new(y)}.__value__
     end
 
@@ -196,7 +220,8 @@ class MaybeTest < Test::Unit::TestCase
       g = lambda {|x| Maybe.new(x+1)}
       m = Maybe.new(3)
       n = Maybe.new(3)
-      assert_equal m.pass{|x| f[x]}.pass{|x|g[x]}.__value__, n.pass{|x| f[x].pass{|y|g[y]}}.__value__
+      assert_equal m.pass{|x| f[x]}.pass{|x|g[x]}.value, n.pass{|x| f[x].pass{|y|g[y]}}.value
+      assert_equal m.__pass__{|x| f[x]}.__pass__{|x|g[x]}.__value__, n.__pass__{|x| f[x].__pass__{|y|g[y]}}.__value__
     end
 
   end
