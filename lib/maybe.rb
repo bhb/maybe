@@ -8,11 +8,12 @@ class Maybe
 
   def initialize(value)
     @value = value
-    self.join
+    join
   end
 
-  def method_missing(method_name, *args)
-    self.fmap do |value|
+  def method_missing(method_name, *args, &block)
+    fmap do |value|
+      #value.send(method_name, *args, &block)
       value.send(method_name,*args) do |*block_args|
         yield(*block_args) if block_given?
       end
@@ -34,11 +35,23 @@ class Maybe
       __value__(args.first)
     end
   end
-  
+
+  def nil?
+    @value==nil
+  end
+
+  def pass(*args, &block)
+    if @value.respond_to?(:pass)
+      @value.send(:pass, *args, &block)
+    else
+      __pass__(&block)
+    end
+  end
+
   # Given that the value is of type A
   # takes a function from A->M[B] and returns
   # M[B] (a monad with a value of type B)
-  def pass
+  def __pass__
     fmap {|*block_args| yield(*block_args)}.join
   end
 
@@ -53,20 +66,11 @@ class Maybe
     end
   end
   
-  def nil?
-    @value==nil
-  end
-
   def join
     if(@value.is_a?(Maybe))
       @value = @value.__value__
     end
     self
-  end
-
-  # for testing purposes
-  def value=(value)
-    @value = value
   end
 
 end

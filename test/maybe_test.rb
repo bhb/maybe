@@ -71,13 +71,21 @@ class MaybeTest < Test::Unit::TestCase
     should "not call #pass" do
       Maybe.any_instance.expects(:pass).never
       m = Maybe.new(nil)
-      m.__value__ = Maybe.new(1)
+      m.instance_variable_set(:@value, Maybe.new(1))
       m.join
     end
 
   end
 
   context "#pass" do
+
+    should "not conflict with wrapped object's #pass method" do
+      ball = Object.new
+      def ball.pass
+        "success"
+      end
+      assert_equal "success", Maybe.new(ball).pass
+    end
 
     should "work with CGI.unescape" do
       # using CGI::unescape because that's the first function I had problems with 
