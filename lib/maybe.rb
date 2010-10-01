@@ -12,10 +12,17 @@ class Maybe
   end
 
   def method_missing(method_name, *args, &block)
-    __fmap__ do |value|
-      #value.send(method_name, *args, &block)
-      value.send(method_name,*args) do |*block_args|
-        yield(*block_args) if block_given?
+    if %w{value pass fmap join}.include?(method_name.to_s)
+      if @value.respond_to?(method_name)
+        @value.send(method_name, *args, &block)
+      else
+        __send__("__#{method_name}__", *args, &block)
+      end
+    else
+      __fmap__ do |value|
+        value.send(method_name,*args) do |*block_args|
+          yield(*block_args) if block_given?
+        end
       end
     end
   end
@@ -27,41 +34,9 @@ class Maybe
       @value
     end
   end
-  
-  def value(*args, &block)
-    if @value.respond_to?(:value)
-      @value.send(:value, *args, &block)
-    else
-      __value__(args.first)
-    end
-  end
 
   def nil?
     @value==nil
-  end
-
-  def pass(*args, &block)
-    if @value.respond_to?(:pass)
-      @value.send(:pass, *args, &block)
-    else
-      __pass__(&block)
-    end
-  end
-
-  def fmap(*args, &block)
-    if @value.respond_to?(:fmap)
-      @value.send(:fmap, *args, &block)
-    else
-      __fmap__(&block)
-    end
-  end
-
-  def join(*args, &block)
-    if @value.respond_to?(:join)
-      @value.send(:join, *args, &block)
-    else
-      __join__(&block)
-    end
   end
 
   # Given that the value is of type A

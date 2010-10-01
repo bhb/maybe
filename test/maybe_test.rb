@@ -180,7 +180,7 @@ class MaybeTest < Test::Unit::TestCase
       assert_equal "x", Maybe.new(wrapped).fmap
       assert_equal "x", Maybe.new(Maybe.new(wrapped)).fmap
     end
-    
+
   end
 
   context "when testing monad rules" do
