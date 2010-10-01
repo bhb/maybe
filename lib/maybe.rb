@@ -18,8 +18,12 @@ class Maybe
     super || @value.respond_to?(method_name)
   end
 
+  def methods
+    super + @value.methods + LEGACY_METHODS
+  end
+
   def method_missing(method_name, *args, &block)
-    if %w{value pass fmap join}.include?(method_name.to_s)
+    if LEGACY_METHODS.include?(method_name.to_s)
       if @value.respond_to?(method_name)
         @value.send(method_name, *args, &block)
       else

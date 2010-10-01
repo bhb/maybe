@@ -123,6 +123,38 @@ class MaybeTest < Test::Unit::TestCase
     
   end
 
+  context "#methods" do
+
+    should "contain methods from wrapped method and wrapper" do
+      klass = Class.new do
+        def fmap
+        end
+
+        def foo
+        end
+      end
+      
+      wrapped = klass.new
+      maybe = Maybe.new(wrapped)
+      
+      methods = maybe.methods.map{|x| x.to_sym}
+
+      assert_equal false, methods.include?(:far)
+      assert_equal true, methods.include?(:foo)
+
+      assert_equal true, methods.include?(:fmap)
+      assert_equal true, methods.include?(:value)
+      assert_equal true, methods.include?(:pass)
+      assert_equal true, methods.include?(:join)
+
+      assert_equal true, methods.include?(:__fmap__)
+      assert_equal true, methods.include?(:__value__)
+      assert_equal true, methods.include?(:__pass__)
+      assert_equal true, methods.include?(:__join__)
+    end
+
+  end
+
   context "#pass" do
 
     should "not conflict with wrapped object's #pass method" do
