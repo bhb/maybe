@@ -79,6 +79,7 @@ class MaybeTest < Test::Unit::TestCase
     should "call the wrapped object's #join if defined" do
       wrapped = %w{a b c}
       assert_equal "a b c", Maybe.new(wrapped).join(' ')
+      assert_equal "a b c", Maybe.new(Maybe.new(wrapped)).join(' ')
     end
 
   end
@@ -130,6 +131,7 @@ class MaybeTest < Test::Unit::TestCase
         "foo"
       end
       assert_equal "foo", Maybe.new(wrapped).value
+      assert_equal "foo", Maybe.new(Maybe.new(wrapped)).value
     end
 
     should "call wrapped object's #value if defined (with params and block)" do
@@ -138,6 +140,7 @@ class MaybeTest < Test::Unit::TestCase
         value * yield 
       end
       assert_equal 4, Maybe.new(wrapped).value(2) { 2 }
+      assert_equal 4, Maybe.new(Maybe.new(wrapped)).value(2) { 2 }
     end
 
   end
@@ -175,6 +178,7 @@ class MaybeTest < Test::Unit::TestCase
         "x"
       end
       assert_equal "x", Maybe.new(wrapped).fmap
+      assert_equal "x", Maybe.new(Maybe.new(wrapped)).fmap
     end
     
   end
