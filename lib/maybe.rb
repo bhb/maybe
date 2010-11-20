@@ -6,7 +6,7 @@ class Maybe
 
   LEGACY_METHODS = %w{value pass fmap join}
 
-  instance_methods.reject { |method_name| method_name =~ /^__/ || ['object_id','respond_to?', 'methods'].include?(method_name) }.each { |method_name| undef_method method_name }
+  instance_methods.reject { |method_name| method_name.to_s =~ /^__/ || ['object_id','respond_to?', 'methods'].include?(method_name.to_s) }.each { |method_name| undef_method method_name }
 
   def initialize(value)
     @value = value
@@ -20,6 +20,11 @@ class Maybe
 
   def methods
     super + @value.methods + LEGACY_METHODS
+  end
+
+  # For Ruby 1.9 support
+  def respond_to_missing?(method_name, *args, &block)
+    super
   end
 
   def method_missing(method_name, *args, &block)

@@ -60,6 +60,7 @@ class MaybeTest < Test::Unit::TestCase
     should "have different object id than wrapped object" do
       wrapped = "hello"
       maybe = Maybe.new(wrapped)
+      assert_kind_of Fixnum, maybe.object_id
       assert_not_equal wrapped.object_id, maybe.object_id
       assert_equal wrapped.object_id, maybe.__value__.object_id
     end
