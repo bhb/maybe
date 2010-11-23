@@ -68,7 +68,8 @@ Related Reading
 * [Reg Braithwaite explores this same problem and comes up with a different, but very cool solution in Ruby](http://weblog.raganwald.com/2008/01/objectandand-objectme-in-ruby.html)
 * [Weave Jester has another solution, inspired by the Maybe monad](http://weavejester.com/node/10)
 
-== Note on Patches/Pull Requests
+Note on Patches/Pull Requests
+------
  
 * Fork the project.
 * Make your feature addition or bug fix.
@@ -79,6 +80,7 @@ Related Reading
   bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
-== Copyright
+Copyright
+----
 
 Copyright (c) 2010 Ben Brinckerhoff. See LICENSE for details.
