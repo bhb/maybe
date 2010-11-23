@@ -72,7 +72,7 @@ class Maybe
       Maybe.new(yield(@value))
     end
   end
-  
+
   def __join__
     if(@value.is_a?(Maybe))
       @value = @value.__value__
