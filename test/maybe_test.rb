@@ -302,4 +302,14 @@ class MaybeTest < Test::Unit::TestCase
 
   end
 
+  context "Object#maybe" do
+    
+    should "allow calling foo#maybe rather than Maybe.new(foo)" do
+      traditional = Maybe.new("foo")
+      monkeyed = "foo".maybe
+      assert_equal traditional, monkeyed
+    end
+
+  end
+
 end
