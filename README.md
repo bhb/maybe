@@ -8,22 +8,28 @@ Synopsis
 
 The Maybe class wraps any value (nil or non-nil) and lets you treat it as non-nil.
 
-     "hello".upcase                         #=> "HELLO"
-     nil.upcase                             #=> NoMethodError: undefined method `upcase' for nil:NilClass
-     Maybe.new("hello").upcase.__value__    #=> "HELLO"
-     Maybe.new(nil).upcase.__value__        #=> nil
+    require "maybe"
+    "hello".upcase                         #=> "HELLO"
+    nil.upcase                             #=> NoMethodError: undefined method `upcase' for nil:NilClass
+    Maybe.new("hello").upcase.__value__    #=> "HELLO"
+    Maybe.new(nil).upcase.__value__        #=> nil
 
 You can also use the method `Maybe` for convenience. The following are equivalent:
 
-     Maybe.new("hello").__value__          #=> "hello"
-     Maybe("hello").__value__              #=> "hello"
+    Maybe.new("hello").__value__           #=> "hello"
+    Maybe("hello").__value__               #=> "hello"
+     
+You can also optionally patch `Object` to include a `#maybe` method:
+
+    require "maybe/core_ext"
+    "hello".maybe.upcase                   #=> "HELLO"
    
 When you call `Maybe.new` with a value, that value is wrapped in a Maybe object. Whenever you call methods on that object, it does a simple check: if the wrapped value is nil, then it returns another Maybe object that wraps nil. If the wrapped object is not nil, it calls the method on that object, then wraps it back up in a Maybe object. 
 
 This is especially handy for long chains of method calls, any of which could return nil.
 
-     # foo, bar, and/or baz could return nil, but this will still work
-     Maybe.new(foo).bar(1).baz(:x)
+    # foo, bar, and/or baz could return nil, but this will still work
+    Maybe.new(foo).bar(1).baz(:x)
 
 Here's a real world example. Instead of writing this:
 
@@ -47,6 +53,8 @@ instead of
 
 Examples
 --------
+
+    require "maybe"
 
     Maybe.new("10")                    #=> A Maybe object, wrapping "10"
   
