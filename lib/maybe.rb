@@ -95,3 +95,9 @@ class Maybe
   end
 
 end
+
+class Object
+  def maybe
+    Maybe.new(self)
+  end
+end
