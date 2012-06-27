@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'cgi'
-require 'shoulda'
+require 'maybe'
 
 class MaybeTest < Test::Unit::TestCase
 
@@ -14,14 +15,14 @@ class MaybeTest < Test::Unit::TestCase
       Maybe.any_instance.expects(:__pass__).never
       Maybe.new(Maybe.new(1)).__value__
     end
-    
+
   end
 
   context "when calling methods" do
 
     should "return correct value for match operator" do
       assert_equal nil, (Maybe.new(nil)=~/b/).__value__
-      assert_equal 1, (Maybe.new('abc')=~/b/).__value__    
+      assert_equal 1, (Maybe.new('abc')=~/b/).__value__
     end
 
     should "return correct value for to_s" do
@@ -33,7 +34,7 @@ class MaybeTest < Test::Unit::TestCase
       assert_equal nil, Maybe.new(nil).to_int.__value__
       assert_equal 2, Maybe.new(2.3).to_int.__value__
     end
-    
+
     should "work if method call takes a block" do
       assert_equal nil, Maybe.new(nil).map{|x|x*2}.__value__
       assert_equal [2,4,6], Maybe.new([1,2,3]).map{|x|x*2}.__value__
@@ -41,7 +42,7 @@ class MaybeTest < Test::Unit::TestCase
 
     should "work if methods takes args and a block" do
       assert_equal nil, Maybe.new(nil).gsub(/x/) {|m| m.upcase}.__value__
-      str = Maybe.new('x').gsub(/x/) do |m| 
+      str = Maybe.new('x').gsub(/x/) do |m|
         m.upcase
       end
       assert_equal 'X', str.__value__
@@ -56,7 +57,7 @@ class MaybeTest < Test::Unit::TestCase
   end
 
   context "when calling object_id" do
-    
+
     should "have different object id than wrapped object" do
       wrapped = "hello"
       maybe = Maybe.new(wrapped)
@@ -68,7 +69,7 @@ class MaybeTest < Test::Unit::TestCase
   end
 
   context "#join" do
-    
+
     should "not call #pass" do
       Maybe.any_instance.expects(:__pass__).never
       m = Maybe.new(nil)
@@ -86,7 +87,7 @@ class MaybeTest < Test::Unit::TestCase
   end
 
   context "respond_to?" do
-    
+
     should "respond correctly" do
       klass = Class.new do
         def fmap
@@ -95,7 +96,7 @@ class MaybeTest < Test::Unit::TestCase
         def foo
         end
       end
-      
+
       wrapped = klass.new
       maybe = Maybe.new(wrapped)
 
@@ -121,7 +122,7 @@ class MaybeTest < Test::Unit::TestCase
       assert_equal true, maybe.respond_to?(:__value__)
       assert_equal true, maybe.respond_to?(:__pass__)
     end
-    
+
   end
 
   context "#methods" do
@@ -134,10 +135,10 @@ class MaybeTest < Test::Unit::TestCase
         def foo
         end
       end
-      
+
       wrapped = klass.new
       maybe = Maybe.new(wrapped)
-      
+
       methods = maybe.methods.map{|x| x.to_sym}
 
       assert_equal false, methods.include?(:far)
@@ -167,7 +168,7 @@ class MaybeTest < Test::Unit::TestCase
     end
 
     should "work with CGI.unescape" do
-      # using CGI::unescape because that's the first function I had problems with 
+      # using CGI::unescape because that's the first function I had problems with
       # when implementing Maybe
       assert_equal nil, Maybe.new(nil).pass {|v|CGI.unescapeHTML(v)}.value
       assert_equal '&', Maybe.new('&amp;').pass {|v|CGI.unescapeHTML(v)}.value
@@ -175,11 +176,11 @@ class MaybeTest < Test::Unit::TestCase
       assert_equal nil, Maybe.new(nil).__pass__ {|v|CGI.unescapeHTML(v)}.__value__
       assert_equal '&', Maybe.new('&amp;').__pass__ {|v|CGI.unescapeHTML(v)}.__value__
     end
-    
+
   end
 
   context "#nil?" do
-    
+
     should "be true for nil value" do
       assert_equal true, Maybe.new(nil).nil?
     end
@@ -209,7 +210,7 @@ class MaybeTest < Test::Unit::TestCase
     should "call wrapped object's #value if defined (with params and block)" do
       wrapped = Object.new
       def wrapped.value(value)
-        value * yield 
+        value * yield
       end
       assert_equal 4, Maybe.new(wrapped).value(2) { 2 }
       assert_equal 4, Maybe.new(Maybe.new(wrapped)).value(2) { 2 }
@@ -270,7 +271,7 @@ class MaybeTest < Test::Unit::TestCase
 
     # monad rules taken from http://moonbase.rydia.net/mental/writings/programming/monads-in-ruby/01identity
     # and http://james-iry.blogspot.com/2007_10_01_archive.html
-  
+
     #1. Calling pass on a newly-wrapped value should have the same effect as giving that value directly to the block.
     # (this is actually the second law at http://james-iry.blogspot.com/2007/10/monads-are-elephants-part-3.html)
     # scala version: unit(x) flatMap f ≡ f(x)
@@ -280,7 +281,7 @@ class MaybeTest < Test::Unit::TestCase
       assert_equal f[x], Maybe.new(x).pass {|y| f[y]}.value
       assert_equal f[x], Maybe.new(x).__pass__ {|y| f[y]}.__value__
     end
-  
+
     #2. pass with a block that simply calls wrap on its value should produce the exact same values, wrapped up again.
     # (this is actually the first law at http://james-iry.blogspot.com/2007/10/monads-are-elephants-part-3.html)
     # scala version: m flatMap unit ≡ m

@@ -14,7 +14,7 @@ class Maybe
     @value = value
     __join__
   end
-  
+
   def respond_to?(method_name)
     return true if LEGACY_METHODS.include?(method_name.to_s)
     super || @value.respond_to?(method_name)
@@ -62,7 +62,7 @@ class Maybe
   end
 
   # Only included to provide a complete Monad interface. Not recommended
-  # for general use. 
+  # for general use.
   # (Technically: Given that the value is of type A
   # takes a function from A->M[B] and returns
   # M[B] (a monad with a value of type B))
@@ -71,7 +71,7 @@ class Maybe
   end
 
   # Only included to provide a complete Monad interface. Not recommended
-  # for general use. 
+  # for general use.
   # (Technically: Given that the value is of type A
   # takes a function from A->B and returns
   # M[B] (a monad with a value of type B))
@@ -84,7 +84,7 @@ class Maybe
   end
 
   # Only included to provide a complete Monad interface. Not recommended
-  # for general use. 
+  # for general use.
   # (Technically: M[M[A]] is equivalent to M[A], that is, monads should be flat
   # rather than nested)
   def __join__
