@@ -91,4 +91,4 @@ Note on Patches/Pull Requests
 Copyright
 ----
 
-Copyright (c) 2009, 2010 Ben Brinckerhoff. See LICENSE for details.
+Copyright (c) 2009-2018 Ben Brinckerhoff. See LICENSE for details.
